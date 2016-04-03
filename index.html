@@ -1,0 +1,49 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+
+    <title>Sine</title>
+
+    <style>
+        .stage{
+            position: relative;
+        }
+
+        .circle{
+            position: absolute;
+            border-radius: 50%;
+            background: red;
+            opacity: 0.5;
+        }
+
+        .containerCircle{
+            position: relative;
+            background: #CCCCCC;
+            border-radius: 50%;
+        }
+    </style>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+    <script src="js/jquery.llapgoch.sine.js"></script>
+</head>
+
+<body>
+    <div class="stage">
+
+    </div>
+    <a class="up" href="#">Up</a>
+
+    <script>
+        (function($){
+            $('.stage').sinewave();
+
+            $('.up').on('click', function(ev){
+                $('.stage').sinewave('up');
+            });
+        }(jQuery));
+    </script>
+</body>
+</html>
