@@ -1,11 +1,16 @@
 jQuery.widget('llapgoch.sinewave', {
     options:{
-        circleDiameter: 10,
-        stageSize: 300,
+        circleDiameter: 5,
+        stageSize: 600,
         containerCircleClass: 'containerCircle',
         circleClass: 'circle',
-        amount: 40,
-        updateInterval: 30,
+        amount: 100,
+        updateInterval: 1,
+        moveAmount: 0.005,
+        updateMethod: function(a, angleInterval){
+            //return Math.cos(a) * Math.PI * a;
+            return Math.sin((angleInterval * (Math.PI / 180))) * a;
+        }
     },
 
     containerCircle: null,
@@ -123,12 +128,10 @@ jQuery.widget('llapgoch.sinewave', {
         var self = this;
         var cRadius = this.options.circleDiameter / 2;
         var midPoint = (this.options.stageSize / 2) - cRadius;
-        var numCircles = this.circles.length;
         var xPos = (self.options.stageSize / 2) - cRadius;
 
         var angleInterval = 360 / this.circles.length / 2;
         var angle = 0;
-        var degs = 360 / self.circles.length;
 
         var mid = {
             x: midPoint,
@@ -140,25 +143,9 @@ jQuery.widget('llapgoch.sinewave', {
             y: 0
         };
 
-
-        var offsetPoint = this._rotatePoint({
-            x:0,
-            y: this.options.stageSize / 2
-        }, zero, (360 / self.circles.length));
-
-
-
-
-        var distance = this._distanceBetweenPoints(offsetPoint, {
-            x:0,
-            y: this.options.stageSize / 2
-        });
-
-        console.log(distance);
-
         $(this.circles).each(function(i){
             var a = i + 1;
-            var offset = Math.sin((angleInterval * (Math.PI / 180))) * a;
+            var offset = self.options.updateMethod(a, angleInterval);
             var sinPos = midPoint + (Math.sin(self.sineCount + offset) * midPoint);
             var yPos = sinPos ;
 
@@ -172,17 +159,10 @@ jQuery.widget('llapgoch.sinewave', {
                 'left': rotated.x
             });
 
-
             angle += angleInterval;
-
-            //if(angle > 90){
-            //    return false;
-            //}
-
-
         });
 
-        self.sineCount += 0.04;
+        self.sineCount += self.options.moveAmount;
 
     },
 
