@@ -1,17 +1,16 @@
 jQuery.widget('llapgoch.sinewave', {
     options:{
-        circleDiameter: 20,
-        stageSize: 500,
+        circleDiameter: 5,
+        stageSize: 400,
         containerCircleClass: 'containerCircle',
         circleClass: 'circle',
-        amount: 18,
+        amount: 50,
         updateInterval: 1,
         moveAmount: 0.005,
-        angleOffset: 0.3,
-        circleDivisor: 4,
+        angleOffset: 0,
+        circleDivisor: 1,
         updateMethod: function(a, angleInterval){
-            return (Math.tan((angleInterval * 360) / (a/a)));
-            //return Math.log(Math.sin((angleInterval * 3600) * a)) * Math.tan(a * a) / Math.tan(a * a);
+
             //return Math.log(Math.sin(angleInterval * a)) * Math.tan(angleInterval ) / Math.tan(a * a);
             //return Math.cos(a * a) / Math.sin(a * a) / Math.tan(a * a);
             return Math.sin((angleInterval * (Math.PI / 180))) * a;
@@ -111,19 +110,10 @@ jQuery.widget('llapgoch.sinewave', {
     },
 
     _distanceBetweenPoints: function(point1, point2){
-       // console.log(point1, point2)
         var xOffset = point1.x - point2.x;
         var yOffset = point1.y - point2.y;
 
-      //  console.log(point1.x - point2.x);
-
         return Math.sqrt((xOffset * yOffset) + (yOffset * yOffset));
-    },
-
-    up: function(){
-        this.mainOffset += 0.1;
-        console.log(this.mainOffset);
-        this._update();
     },
 
     _update: function(){
@@ -146,10 +136,10 @@ jQuery.widget('llapgoch.sinewave', {
         };
 
         $(this.circles).each(function(i){
-            var a = i + 1;
-            var offset = self.options.updateMethod(a, angleInterval);
-            var sinPos = midPoint + (Math.sin(self.sineCount + offset) * midPoint);
-            var yPos = sinPos ;
+            var a = i + 1,
+                offset = self.options.updateMethod(a, angleInterval),
+                sinPos = midPoint + (Math.sin(self.sineCount + (isNaN(offset) ? 0 : offset)) * midPoint),
+                yPos = sinPos;
 
             var rotated = self._rotatePoint({
                 'x': xPos ,
