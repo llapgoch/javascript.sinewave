@@ -4,11 +4,12 @@ jQuery.widget('llapgoch.sinewave', {
         stageSize: 600,
         containerCircleClass: 'containerCircle',
         circleClass: 'circle',
-        amount: 100,
+        amount: 300,
         updateInterval: 1,
         moveAmount: 0.005,
+        angleOffset: 0.1,
         updateMethod: function(a, angleInterval){
-            //return Math.cos(a) * Math.PI * a;
+            return Math.tan(a) * Math.E / (1/a);
             return Math.sin((angleInterval * (Math.PI / 180))) * a;
         }
     },
@@ -19,6 +20,7 @@ jQuery.widget('llapgoch.sinewave', {
     sineCount: 0,
     circles:[],
     mainOffset: 0,
+    startAngle: 0,
 
     _create: function(){
         this.enable();
@@ -33,8 +35,7 @@ jQuery.widget('llapgoch.sinewave', {
 
         this.element
             .width(this.options.stageSize)
-            .height(this.options.stageSize)
-            .css('border', '1px solid red');
+            .height(this.options.stageSize);
 
         if (!this.containerCircle) {
             this.containerCircle = $('<div />');
@@ -71,9 +72,6 @@ jQuery.widget('llapgoch.sinewave', {
             this.circles[i] = circle;
             this.containerCircles.append(circle);
         }
-
-
-
     },
 
     enable: function(){
@@ -131,7 +129,7 @@ jQuery.widget('llapgoch.sinewave', {
         var xPos = (self.options.stageSize / 2) - cRadius;
 
         var angleInterval = 360 / this.circles.length / 2;
-        var angle = 0;
+        var angle = this.startAngle;
 
         var mid = {
             x: midPoint,
@@ -163,7 +161,7 @@ jQuery.widget('llapgoch.sinewave', {
         });
 
         self.sineCount += self.options.moveAmount;
-
+        self.startAngle += self.options.angleOffset;
     },
 
     _rotatePoint: function($pPoint, $pOrigin, rot){
