@@ -1,15 +1,19 @@
 jQuery.widget('llapgoch.sinewave', {
     options:{
-        circleDiameter: 5,
-        stageSize: 600,
+        circleDiameter: 20,
+        stageSize: 500,
         containerCircleClass: 'containerCircle',
         circleClass: 'circle',
-        amount: 300,
+        amount: 18,
         updateInterval: 1,
         moveAmount: 0.005,
-        angleOffset: 0.1,
+        angleOffset: 0.3,
+        circleDivisor: 4,
         updateMethod: function(a, angleInterval){
-            return Math.tan(a) * Math.E / (1/a);
+            return (Math.tan((angleInterval * 360) / (a/a)));
+            //return Math.log(Math.sin((angleInterval * 3600) * a)) * Math.tan(a * a) / Math.tan(a * a);
+            //return Math.log(Math.sin(angleInterval * a)) * Math.tan(angleInterval ) / Math.tan(a * a);
+            //return Math.cos(a * a) / Math.sin(a * a) / Math.tan(a * a);
             return Math.sin((angleInterval * (Math.PI / 180))) * a;
         }
     },
@@ -128,7 +132,7 @@ jQuery.widget('llapgoch.sinewave', {
         var midPoint = (this.options.stageSize / 2) - cRadius;
         var xPos = (self.options.stageSize / 2) - cRadius;
 
-        var angleInterval = 360 / this.circles.length / 2;
+        var angleInterval = 360 / this.circles.length / this.options.circleDivisor;
         var angle = this.startAngle;
 
         var mid = {
