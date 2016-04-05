@@ -1,18 +1,16 @@
 jQuery.widget('llapgoch.sinewave', {
     options:{
-        circleDiameter: 5,
+        circleDiameter: 2,
         stageSize: 400,
         containerCircleClass: 'containerCircle',
         circleClass: 'circle',
         amount: 50,
-        updateInterval: 1,
+        updateInterval: 5,
         moveAmount: 0.005,
         angleOffset: 0,
         circleDivisor: 1,
+        circleColor: 'red',
         updateMethod: function(a, angleInterval){
-
-            //return Math.log(Math.sin(angleInterval * a)) * Math.tan(angleInterval ) / Math.tan(a * a);
-            //return Math.cos(a * a) / Math.sin(a * a) / Math.tan(a * a);
             return Math.sin((angleInterval * (Math.PI / 180))) * a;
         }
     },
@@ -24,57 +22,44 @@ jQuery.widget('llapgoch.sinewave', {
     circles:[],
     mainOffset: 0,
     startAngle: 0,
+    initComplete: false,
+    canvas: null,
+    context: null,
 
     _create: function(){
+        // Create the canvas
+        var canvas =  $('<canvas />', {
+            width: this.options.stageSize,
+            height: this.options.stageSize
+        });
+
+        this.canvas = canvas.get(0);
+
+        this.canvas.width = this.options.stageSize;
+        this.canvas.height = this.options.stageSize;
+
+        this.element.append(this.canvas);
+        this.context = this.canvas.getContext('2d');
+
+        this._addEvents();
         this.enable();
     },
 
     _init: function(){
-        this._refresh();
+
     },
 
-    _refresh: function() {
-        var circle;
-
-        this.element
-            .width(this.options.stageSize)
-            .height(this.options.stageSize);
-
-        if (!this.containerCircle) {
-            this.containerCircle = $('<div />');
-        }
-
-        if(!this.containerCircles){
-            this.containerCircles = $('<div />');
-        }
-
-        this.containerCircle.addClass(this.options.containerCircleClass)
-            .width(this.options.stageSize)
-            .height(this.options.stageSize);
-
-
-        this.element
-            .append(this.containerCircle)
-            .append(this.containerCircles);
-
-        for(var a = 0; a < this.circles.length; a++){
-            this.circles[a].remove();
-        }
-
-        this.circles = [];
-
-        for(var i = 0; i < this.options.amount; i++){
-            if(this.circles[i]){
-                continue;
+    _addEvents: function(){
+        this._on(this.element, {
+            "click .stop": function(ev){
+                ev.preventDefault();
+                this.disable();
+            },
+            "click .start": function(ev){
+                ev.preventDefault();
+                this.enable();
             }
-            circle = $('<div />')
-                .addClass(this.options.circleClass)
-                .width(this.options.circleDiameter)
-                .height(this.options.circleDiameter);
-
-            this.circles[i] = circle;
-            this.containerCircles.append(circle);
-        }
+        });
     },
 
     enable: function(){
@@ -101,6 +86,7 @@ jQuery.widget('llapgoch.sinewave', {
     _stop: function(){
         if(this.updateId){
             window.clearInterval(this.updateId);
+            this.updateId = null;
         }
     },
 
@@ -122,7 +108,7 @@ jQuery.widget('llapgoch.sinewave', {
         var midPoint = (this.options.stageSize / 2) - cRadius;
         var xPos = (self.options.stageSize / 2) - cRadius;
 
-        var angleInterval = 360 / this.circles.length / this.options.circleDivisor;
+        var angleInterval = 360 / this.options.amount / this.options.circleDivisor;
         var angle = this.startAngle;
 
         var mid = {
@@ -135,10 +121,17 @@ jQuery.widget('llapgoch.sinewave', {
             y: 0
         };
 
-        $(this.circles).each(function(i){
-            var a = i + 1,
-                offset = self.options.updateMethod(a, angleInterval),
-                sinPos = midPoint + (Math.sin(self.sineCount + (isNaN(offset) ? 0 : offset)) * midPoint),
+
+        this.context.clearRect(0, 0, this.options.stageSize, this.options.stageSize);
+        this.context.fillStyle = this.options.circleColor;
+
+        for(var i = 1; i <= this.options.amount; i++){
+
+            var offset = self.options.updateMethod(i, angleInterval);
+
+            offset = isNaN(offset) ? 0 : offset;
+
+            var sinPos = midPoint + (Math.sin(self.sineCount + offset) * midPoint),
                 yPos = sinPos;
 
             var rotated = self._rotatePoint({
@@ -146,16 +139,20 @@ jQuery.widget('llapgoch.sinewave', {
                 'y': yPos
             }, mid, angle);
 
-            this.css({
-                'top': rotated.y,
-                'left': rotated.x
-            });
+            this.context.beginPath();
+            this.context.arc(rotated.x, rotated.y, this.options.circleDiameter, 0, 2 * Math.PI, false);
+            this.context.fill();
 
             angle += angleInterval;
-        });
+        }
 
         self.sineCount += self.options.moveAmount;
         self.startAngle += self.options.angleOffset;
+
+        if(!this.initComplete){
+            this._stop();
+            this.initComplete = true;
+        }
     },
 
     _rotatePoint: function($pPoint, $pOrigin, rot){

@@ -13,19 +13,40 @@
         .stage{
             position: relative;
             float: left;
+            margin-bottom: 20px;
         }
 
         .circle{
             position: absolute;
-            border-radius: 50%;
-            background: white;
+            /*border-radius: 50%;*/
+            background: red;
             opacity: 0.5;
+            -webkit-filter: blur(5px);
         }
+
 
         .containerCircle{
             position: relative;
-            border: 1px dotted #868686;
+            /*border: 1px dotted #868686;*/
             border-radius: 50%;
+        }
+
+        .controls{
+            text-align: center;
+            padding-bottom: 20px;
+        }
+
+        .controls a{
+            text-decoration: none;
+            font-family: Arial;
+        }
+
+        .controls .start{
+            color: green;
+        }
+
+        .controls .stop{
+            color: red;
         }
     </style>
 
@@ -35,15 +56,87 @@
 </head>
 
 <body>
-<div class="stage" id="stage3">
-</div>
-    <div class="stage" id="stage1">
-    </div>
 
-    <div class="stage" id="stage2">
+<div class="stage" id="stage11">
+    <div class="controls">
+        <a href="#" class="start">Start</a>
+        <a href="#" class="stop">Stop</a>
     </div>
+</div>
+
+
+<div class="stage" id="stage10">
+    <div class="controls">
+        <a href="#" class="start">Start</a>
+        <a href="#" class="stop">Stop</a>
+    </div>
+</div>
+
+<div class="stage" id="stage9">
+    <div class="controls">
+        <a href="#" class="start">Start</a>
+        <a href="#" class="stop">Stop</a>
+    </div>
+</div>
+
+<div class="stage" id="stage8">
+    <div class="controls">
+        <a href="#" class="start">Start</a>
+        <a href="#" class="stop">Stop</a>
+    </div>
+</div>
+
+<div class="stage" id="stage7">
+    <div class="controls">
+        <a href="#" class="start">Start</a>
+        <a href="#" class="stop">Stop</a>
+    </div>
+</div>
+
+<div class="stage" id="stage6">
+    <div class="controls">
+        <a href="#" class="start">Start</a>
+        <a href="#" class="stop">Stop</a>
+    </div>
+</div>
+
+<div class="stage" id="stage5">
+    <div class="controls">
+        <a href="#" class="start">Start</a>
+        <a href="#" class="stop">Stop</a>
+    </div>
+</div>
+
+
+<div class="stage" id="stage3">
+    <div class="controls">
+        <a href="#" class="start">Start</a>
+        <a href="#" class="stop">Stop</a>
+    </div>
+</div>
+
+<div class="stage" id="stage1">
+
+    <div class="controls">
+        <a href="#" class="start">Start</a>
+        <a href="#" class="stop">Stop</a>
+    </div>
+</div>
+
+<div class="stage" id="stage2">
+
+    <div class="controls">
+        <a href="#" class="start">Start</a>
+        <a href="#" class="stop">Stop</a>
+    </div>
+</div>
 
 <div class="stage" id="stage4">
+
+    <div class="controls">
+        <a href="#" class="start">Start</a>
+        <a href="#" class="stop">Stop</a>
+    </div>
 </div>
 
 
@@ -55,7 +148,7 @@
             });
 
             $('#stage1').sinewave({
-                circleDiameter: 5,
+                circleDiameter: 2.5,
                 angleOffset: 0.5,
                 amount: 250,
                 updateMethod: function(a, angleInterval){
@@ -64,7 +157,7 @@
             });
 
             $('#stage2').sinewave({
-                circleDiameter: 5,
+                circleDiameter: 2.5,
                 angleOffset: 0.5,
                 amount: 250,
                 updateMethod: function(a, angleInterval){
@@ -73,9 +166,73 @@
             });
 
             $('#stage4').sinewave({
-                circleDivisor: 2
+                circleDivisor: 2,
+                amount: 30,
+                circleDiameter: 2.5
             });
 
+            $('#stage5').sinewave({
+                circleDivisor: 1,
+                amount: 150,
+                updateMethod: function(a, angleInterval){
+                    return Math.log(Math.sin(angleInterval * a)) * Math.tan(angleInterval ) / Math.tan(a * angleInterval);
+                }
+            });
+
+            $('#stage6').sinewave({
+                circleDivisor: 2,
+                amount: 250,
+                updateMethod: function(a, angleInterval){
+                    return Math.cos(a * a) * Math.sin(a * a) * Math.tan(a * a);
+                }
+            });
+
+            $('#stage7').sinewave({
+                circleDiameter: 2.5,
+                angleOffset: 0,
+                amount: 250,
+                updateMethod: function(a, angleInterval){
+                    return Math.sin((angleInterval * 360) * a) * Math.tan(a * a) / Math.tan(a * a);
+                }
+            });
+
+            $('#stage8').sinewave({
+                circleDiameter: 3,
+                angleOffset: 0,
+                amount: 1000,
+                updateMethod: function(a, angleInterval){
+                    return Math.sin((angleInterval * 10) * a) * Math.tan(a * a) / Math.tan(a * a);
+                }
+            });
+
+            $('#stage9').sinewave({
+                circleDiameter: 3,
+                angleOffset: 0,
+                amount: 200,
+                updateMethod: function(a, angleInterval){
+                    return Math.sqrt(Math.PI * (a * a));
+                }
+            });
+
+            $('#stage10').sinewave({
+                circleDiameter: 1.5,
+                angleOffset: 0,
+                amount: 600,
+                angleOffset: 0.3,
+                updateMethod: function(a, angleInterval){
+                    return Math.sqrt(Math.cos(a) * Math.cos(a));
+                }
+            });
+
+            $('#stage11').sinewave({
+                circleDiameter: 2.5,
+                angleOffset: 0,
+                amount: 600,
+                angleOffset: 0.3,
+                updateMethod: function(a, angleInterval){
+                    return Math.sin(Math.log(a * a) / Math.cos(a) * Math.E);
+                }
+            });
 
         }(jQuery));
     </script>
