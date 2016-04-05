@@ -1,30 +1,41 @@
 jQuery.widget('llapgoch.sinewave', {
     options:{
-        circleDiameter: 2,
+        circleDiameter: 4,
         stageSize: 400,
         containerCircleClass: 'containerCircle',
         circleClass: 'circle',
         amount: 50,
         updateInterval: 5,
-        moveAmount: 0.005,
+        moveAmount: 0.004,
         angleOffset: 0,
         circleDivisor: 1,
         circleColor: 'red',
+        numberOfTrails: 1,
+        blur: 5,
+
         updateMethod: function(a, angleInterval){
             return Math.sin((angleInterval * (Math.PI / 180))) * a;
+        },
+
+        trailsUpdateMethod: function(point, i){
+            var dist = ((this.options.numberOfTrails - i) / this.options.numberOfTrails);
+            point.alpha = dist;
+            point.color = this.options.circleColor;
+            point.diameter = this.options.circleDiameter * dist;
+
+            return point;
         }
     },
 
-    containerCircle: null,
     containerCircles: null,
     updateId: null,
     sineCount: 0,
-    circles:[],
+    points: null,
     mainOffset: 0,
     startAngle: 0,
     initComplete: false,
     canvas: null,
-    context: null,
+    ctx: null,
 
     _create: function(){
         // Create the canvas
@@ -33,20 +44,29 @@ jQuery.widget('llapgoch.sinewave', {
             height: this.options.stageSize
         });
 
+        if(this.options.blur) {
+            var blur = 'blur(' + this.options.blur + 'px)';
+
+            canvas.css({
+                'filter': blur,
+                '-webkit-filter': blur,
+                '-moz-filter': blur,
+                '-o-filter': blur,
+                '-ms-filter': blur
+            });
+        }
+
+        this.points = [];
         this.canvas = canvas.get(0);
 
         this.canvas.width = this.options.stageSize;
         this.canvas.height = this.options.stageSize;
 
         this.element.append(this.canvas);
-        this.context = this.canvas.getContext('2d');
+        this.ctx = this.canvas.getContext('2d');
 
         this._addEvents();
         this.enable();
-    },
-
-    _init: function(){
-
     },
 
     _addEvents: function(){
@@ -122,12 +142,11 @@ jQuery.widget('llapgoch.sinewave', {
         };
 
 
-        this.context.clearRect(0, 0, this.options.stageSize, this.options.stageSize);
-        this.context.fillStyle = this.options.circleColor;
+        this.ctx.clearRect(0, 0, this.options.stageSize, this.options.stageSize);
 
-        for(var i = 1; i <= this.options.amount; i++){
+        for(var i = 0; i <= this.options.amount; i++){
 
-            var offset = self.options.updateMethod(i, angleInterval);
+            var offset = self.options.updateMethod(i + 1, angleInterval);
 
             offset = isNaN(offset) ? 0 : offset;
 
@@ -139,11 +158,19 @@ jQuery.widget('llapgoch.sinewave', {
                 'y': yPos
             }, mid, angle);
 
-            this.context.beginPath();
-            this.context.arc(rotated.x, rotated.y, this.options.circleDiameter, 0, 2 * Math.PI, false);
-            this.context.fill();
+
+            rotated.diameter = this.options.circleDiameter;
+            rotated.color = this.options.circleColor;
+
+            if(!this.points[i]) {
+                this.points[i] = [];
+            }
+
+            // Add the point to the trails array
+            this._updatePoints(this.points[i], rotated);
 
             angle += angleInterval;
+            //break;
         }
 
         self.sineCount += self.options.moveAmount;
@@ -152,6 +179,31 @@ jQuery.widget('llapgoch.sinewave', {
         if(!this.initComplete){
             this._stop();
             this.initComplete = true;
+        }
+    },
+
+    _drawPoint: function(options){
+
+        this.ctx.fillStyle = options.color;
+
+        this.ctx.beginPath();
+        this.ctx.globalAlpha = options.alpha;
+        this.ctx.arc(options.x, options.y, options.diameter, 0, 2 * Math.PI, false);
+        this.ctx.fill();
+    },
+
+    _updatePoints: function(points, newPoint){
+        if(points.length >= this.options.numberOfTrails){
+            points.splice(this.options.numberOfTrails - 1, points.length - (this.options.numberOfTrails) + 1);
+        }
+
+        if(newPoint) {
+            points.splice(0, 0, newPoint);
+        }
+
+        for(var i = 0; i < points.length; i++){
+            var values = this.options.trailsUpdateMethod.apply(this, [points[i], i]);
+            this._drawPoint(values);
         }
     },
 

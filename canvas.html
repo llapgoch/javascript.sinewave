@@ -1,0 +1,41 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+
+    <title>Sine</title>
+
+    <style>
+        .circle{
+            width: 4px;
+            height: 4px;
+            background: black;
+            border-radius: 50%;
+        }
+    </style>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+    <script src="js/jquery.llapgoch.sine.js"></script>
+</head>
+
+<body>
+<div class="circle"></div>
+<canvas id="can" width="400" height="400"></canvas>
+<script>
+    (function($){
+        var ctx = $("#can").get(0).getContext('2d');
+        console.log(ctx.canvas.width, ctx.canvas.height);
+        var coords = [ [150,50], [20,85], [160,95] ];
+
+        for(var i = 0; i < coords.length; i++){
+            ctx.beginPath();
+            ctx.arc(coords[i][0], coords[i][1], 2, 0, (Math.PI / 180) * 360, true);
+            ctx.closePath();
+            ctx.fill();
+        }
+    }(jQuery));
+</script>
+</body>
+</html>
