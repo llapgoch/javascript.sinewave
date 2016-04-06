@@ -163,8 +163,9 @@
 
             $('#stage2').sinewave({
                 circleDiameter: 2.5,
-                angleOffset: 0.5,
+                angleOffset: 0.07,
                 amount: 250,
+                moveAmount: 0.002,
                 updateMethod: function(a, angleInterval){
                     return (Math.tan((angleInterval * 360) / (Math.log(a))));
                 }
@@ -179,6 +180,7 @@
             $('#stage5').sinewave({
                 circleDivisor: 1,
                 amount: 150,
+                numberOfTrails: 30,
                 updateMethod: function(a, angleInterval){
                     return Math.log(Math.sin(angleInterval * a)) * Math.tan(angleInterval ) / Math.tan(a * angleInterval);
                 }
@@ -189,24 +191,41 @@
                 amount: 50,
                 updateMethod: function(a, angleInterval){
                     return Math.cos(a * a) * Math.sin(a * a) * Math.tan(a * a);
+                },
+                trailsUpdateMethod: function(point, a){
+                    point.alpha = Math.random();
+
+                    return point;
                 }
             });
 
+            // Random alpha
             $('#stage7').sinewave({
                 circleDiameter: 2.5,
                 angleOffset: 0,
                 amount: 250,
                 updateMethod: function(a, angleInterval){
                     return Math.sin((angleInterval * 360) * a) * Math.tan(a * a) / Math.tan(a * a);
+                },
+                trailsUpdateMethod: function(point, a){
+                    point.alpha = Math.random();
+
+                    return point;
                 }
             });
 
+            // Alpha for the x-axis
             $('#stage8').sinewave({
                 circleDiameter: 3,
                 angleOffset: 0,
                 amount: 1000,
                 updateMethod: function(a, angleInterval){
                     return Math.sin((angleInterval * 10) * a) * Math.tan(a * a) / Math.tan(a * a);
+                },
+                trailsUpdateMethod: function(point, a){
+                    point.alpha = point.x / 400;
+
+                    return point;
                 }
             });
 
@@ -234,8 +253,14 @@
                 angleOffset: 0,
                 amount: 200,
                 angleOffset: 0.3,
+                blur: 14,
                 updateMethod: function(a, angleInterval){
                     return Math.sin(Math.log(a * a) / Math.cos(a) * Math.E);
+                },
+                trailsUpdateMethod: function(point, a){
+                    point.alpha = point.x / 400;
+
+                    return point;
                 }
             });
 

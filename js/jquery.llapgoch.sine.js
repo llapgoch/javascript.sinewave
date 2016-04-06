@@ -97,6 +97,8 @@ jQuery.widget('llapgoch.sinewave', {
 
         var self = this;
 
+
+
         this.updateId = window.setInterval(function(){
             self._update();
         }, this.options.updateInterval);
@@ -216,4 +218,5 @@ jQuery.widget('llapgoch.sinewave', {
 
         return $rp;
     }
+
 });
