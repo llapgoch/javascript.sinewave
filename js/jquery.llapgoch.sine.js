@@ -1,5 +1,5 @@
 jQuery.widget('llapgoch.sinewave', {
-    options:{
+    options: {
         circleDiameter: 4,
         stageSize: 400,
         containerCircleClass: 'containerCircle',
@@ -11,13 +11,13 @@ jQuery.widget('llapgoch.sinewave', {
         circleDivisor: 1,
         circleColor: 'red',
         numberOfTrails: 1,
-        blur: 5,
+        blur: 2,
 
-        updateMethod: function(a, angleInterval){
+        updateMethod: function (a, angleInterval) {
             return Math.sin((angleInterval * (Math.PI / 180))) * a;
         },
 
-        trailsUpdateMethod: function(point, i){
+        trailsUpdateMethod: function (point, i) {
             var dist = ((this.options.numberOfTrails - i) / this.options.numberOfTrails);
             point.alpha = dist;
             point.color = this.options.circleColor;
@@ -36,6 +36,25 @@ jQuery.widget('llapgoch.sinewave', {
     initComplete: false,
     canvas: null,
     ctx: null,
+    compositeModes:[
+        'source',
+        'destination',
+        'lighter',
+        'copy',
+        'xor',
+        'multiply',
+        'overlay',
+        'darken',
+        'lighten',
+        'color-dodge',
+        'color-burn',
+        'hard-light',
+        'soft-light'
+    ],
+    compositeSubModes: {
+        'source': ['over', 'in', 'out', 'atop'],
+        'destination': ['over', 'in', 'out', 'atop']
+    },
 
     _create: function(){
         // Create the canvas
@@ -64,6 +83,7 @@ jQuery.widget('llapgoch.sinewave', {
 
         this.element.append(this.canvas);
         this.ctx = this.canvas.getContext('2d');
+       // this.ctx.globalCompositeOperation = 'source-over';
 
         this._addEvents();
         this.enable();
@@ -97,8 +117,6 @@ jQuery.widget('llapgoch.sinewave', {
 
         var self = this;
 
-
-
         this.updateId = window.setInterval(function(){
             self._update();
         }, this.options.updateInterval);
@@ -110,11 +128,6 @@ jQuery.widget('llapgoch.sinewave', {
             window.clearInterval(this.updateId);
             this.updateId = null;
         }
-    },
-
-    _setOption: function(key, value){
-        this._superApply(arguments);
-        this._refresh();
     },
 
     _distanceBetweenPoints: function(point1, point2){

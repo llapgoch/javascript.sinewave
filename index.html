@@ -17,10 +17,6 @@
 
         }
 
-        .stage canvas{
-            -webkit-filter: blur(8px);
-        }
-
         .circle{
             position: absolute;
             /*border-radius: 50%;*/
@@ -156,6 +152,7 @@
                 circleDiameter: 2.5,
                 angleOffset: 0.5,
                 amount: 250,
+
                 updateMethod: function(a, angleInterval){
                     return Math.sin((angleInterval * 3600) * a) * Math.tan(a * a) / Math.tan(a * a);
                 }
@@ -179,7 +176,7 @@
 
             $('#stage5').sinewave({
                 circleDivisor: 1,
-                amount: 150,
+                amount: 300,
                 numberOfTrails: 30,
                 updateMethod: function(a, angleInterval){
                     return Math.log(Math.sin(angleInterval * a)) * Math.tan(angleInterval ) / Math.tan(a * angleInterval);
@@ -187,8 +184,9 @@
             });
 
             $('#stage6').sinewave({
-                circleDivisor: 5,
-                amount: 50,
+                circleDivisor: 1,
+                amount: 100,
+                circleColor: 'green',
                 updateMethod: function(a, angleInterval){
                     return Math.cos(a * a) * Math.sin(a * a) * Math.tan(a * a);
                 },
@@ -224,7 +222,7 @@
                 },
                 trailsUpdateMethod: function(point, a){
                     point.alpha = point.x / 400;
-
+                    point.color = Math.round(Math.random()) ? 'red' : 'green';
                     return point;
                 }
             });
