@@ -7,7 +7,8 @@ jQuery.widget('llapgoch.centipede', {
         minDiameter: 20,
         maxDiameter: 300,
         minDegrees: 1,
-        maxDegrees: 300
+        maxDegrees: 300,
+        speed: 1
     },
     
     canvas: null,
@@ -37,7 +38,7 @@ jQuery.widget('llapgoch.centipede', {
         this.currentX = this.options.startPointX;
         this.currentY = this.options.startPointY;
 
-        for(var i = 0; i < 2; i++){
+        for(var i = 0; i < 20; i++){
             this._createArc();
         }
     },
@@ -76,9 +77,9 @@ jQuery.widget('llapgoch.centipede', {
         var c = 0;
         
         do{
-            diameter = 200;//(Math.random() * (this.options.maxDiameter - this.options.minDiameter)) + this.options.minDiameter;
+            diameter = (Math.random() * (this.options.maxDiameter - this.options.minDiameter)) + this.options.minDiameter;
             direction = Math.random() >= 0.5 ? -1 : 1;
-            numberOfDegrees = 180 * direction; //((Math.random() * (this.options.maxDegrees - this.options.minDegrees)) + this.options.minDegrees) * direction;
+            numberOfDegrees = ((Math.random() * (this.options.maxDegrees - this.options.minDegrees)) + this.options.minDegrees) * direction;
             diameter *= direction;
             
             centerX = this.currentX + ((diameter / 2));
@@ -109,24 +110,22 @@ jQuery.widget('llapgoch.centipede', {
                 break;
             }
             
-        }while(isOnStage == false);
+        } while(isOnStage == false);
         
         
-        
-        
-       
-        
+        var circumference = (Math.PI * diameter);
+        var distance = (circumference / 360) * numberOfDegrees;
+        var steps = distance / this.options.speed; 
+        var angleStep = numberOfDegrees / steps;
         
         this.ctx.fillStyle = 'blue';
         this.ctx.fillRect(centerPoint.x, centerPoint.y, 2, 2);
         this.ctx.fill();
         
         
-        for(i = 0; i < Math.abs(numberOfDegrees); i++){
-            var val = i;
-            if(numberOfDegrees < 0){
-                val = -i;
-            }
+        for(i = 0; i < steps; i++){
+            var val = i * angleStep;
+            
             var rad = this._degreesToRadians(this.currentRotation + val - 180);
             var posY = Math.sin(rad) * (diameter / 2) + centerPoint.y;
             var posX = Math.cos(rad) * (diameter / 2) + centerPoint.x;

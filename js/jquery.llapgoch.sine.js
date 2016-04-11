@@ -11,16 +11,19 @@ jQuery.widget('llapgoch.sinewave', {
         circleDivisor: 1,
         circleColor: 'red',
         numberOfTrails: 1,
-        blur: 2,
-
+        blur: 0,
+        clearOnUpdate: true,
+        
         updateMethod: function (a, angleInterval) {
             return Math.sin((angleInterval * (Math.PI / 180))) * a;
         },
 
-        trailsUpdateMethod: function (point, i) {
-            var dist = ((this.options.numberOfTrails - i) / this.options.numberOfTrails);
+        // override this to adapt the points on an individual basis
+        trailsUpdateMethod: function (point, pointNumber, trailNumber) {
+            var dist = ((this.options.numberOfTrails - trailNumber) / this.options.numberOfTrails);
+            var perc = pointNumber / this.options.amount;
+            
             point.alpha = dist;
-            point.color = this.options.circleColor;
             point.diameter = this.options.circleDiameter * dist;
 
             return point;
@@ -76,6 +79,7 @@ jQuery.widget('llapgoch.sinewave', {
         }
 
         this.points = [];
+        this.colours = [];
         this.canvas = canvas.get(0);
 
         this.canvas.width = this.options.stageSize;
@@ -83,7 +87,6 @@ jQuery.widget('llapgoch.sinewave', {
 
         this.element.append(this.canvas);
         this.ctx = this.canvas.getContext('2d');
-       // this.ctx.globalCompositeOperation = 'source-over';
 
         this._addEvents();
         this.enable();
@@ -100,6 +103,18 @@ jQuery.widget('llapgoch.sinewave', {
                 this.enable();
             }
         });
+    },
+    
+    getRandomCompositeMode: function(){
+        var main = Math.round(Math.random() * this.compositeModes.length);
+        var mode = this.compositeModes[main];
+        
+        if(this.compositeSubModes[main]){
+            var sub = Math.round(Math.random() * this.compositeSubModes[main]);
+            return main + "-" + this.compositeSubModes[main][sub];
+        }
+        
+        return mode;
     },
 
     enable: function(){
@@ -156,9 +171,10 @@ jQuery.widget('llapgoch.sinewave', {
             y: 0
         };
 
-
-        this.ctx.clearRect(0, 0, this.options.stageSize, this.options.stageSize);
-
+        if(this.options.clearOnUpdate){
+             this.ctx.clearRect(0, 0, this.options.stageSize, this.options.stageSize);
+        }
+        
         for(var i = 0; i <= this.options.amount; i++){
 
             var offset = self.options.updateMethod(i + 1, angleInterval);
@@ -182,7 +198,7 @@ jQuery.widget('llapgoch.sinewave', {
             }
 
             // Add the point to the trails array
-            this._updatePoints(this.points[i], rotated);
+            this._updatePoints(this.points[i], rotated, i);
 
             angle += angleInterval;
             //break;
@@ -207,7 +223,7 @@ jQuery.widget('llapgoch.sinewave', {
         this.ctx.fill();
     },
 
-    _updatePoints: function(points, newPoint){
+    _updatePoints: function(points, newPoint, pointNumber){
         if(points.length >= this.options.numberOfTrails){
             points.splice(this.options.numberOfTrails - 1, points.length - (this.options.numberOfTrails) + 1);
         }
@@ -217,7 +233,7 @@ jQuery.widget('llapgoch.sinewave', {
         }
 
         for(var i = 0; i < points.length; i++){
-            var values = this.options.trailsUpdateMethod.apply(this, [points[i], i]);
+            var values = this.options.trailsUpdateMethod.apply(this, [points[i], pointNumber, i]);
             this._drawPoint(values);
         }
     },

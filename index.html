@@ -149,12 +149,50 @@
             });
 
             $('#stage1').sinewave({
-                circleDiameter: 2.5,
+                circleDiameter: 3,
                 angleOffset: 0.5,
-                amount: 250,
+                amount: 7,
+                blur: 0,
 
                 updateMethod: function(a, angleInterval){
                     return Math.sin((angleInterval * 3600) * a) * Math.tan(a * a) / Math.tan(a * a);
+                },
+                trailsUpdateMethod: function(point, pointNumber, trailNumber){
+                    if(!this.pointColours){
+                        this.pointColours = [];
+                    }
+                    
+                    if(!this.pointColours[pointNumber]){
+                        var r = Math.round(Math.random() * 255);
+                        var g = Math.round(Math.random() * 255);
+                        var b = Math.abs(Math.round(Math.random() * 255));
+                        
+                        if(pointNumber > 4){
+                            r = 0;
+                            g = 0;
+                            b = 0;
+                        }
+                        
+                        this.pointColours[pointNumber] = "rgba(" + r + ", " + g + ", " + b + ", 0.3)";
+                    }
+                    
+                    point.alpha = 1;
+                    point.color = this.pointColours[pointNumber];
+                    
+                    if(!this.counter){
+                        this.counter = 0;
+                    }
+                    
+                    this.options.clearOnUpdate = false;
+                    
+                    if(this.counter > 5000){
+                        // this.clearOnUpdate = false;
+                        this.ctx.globalCompositeOperation = 'color-dodge';
+                    }
+                    
+                    this.counter++;
+                    
+                    return point;
                 }
             });
 
@@ -165,6 +203,23 @@
                 moveAmount: 0.002,
                 updateMethod: function(a, angleInterval){
                     return (Math.tan((angleInterval * 360) / (Math.log(a))));
+                },
+                trailsUpdateMethod: function(point, pointNumber, trailNumber){
+                   
+                    
+                    if(!this.counter){
+                        this.counter = 0;
+
+                    }
+                    
+                    this.options.clearOnUpdate = false;
+                    if(this.counter > 50000){
+                        this.ctx.globalCompositeOperation = "lighten";
+
+                    }
+                    
+                    this.counter++;
+                    return point;
                 }
             });
 
