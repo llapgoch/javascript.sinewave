@@ -173,7 +173,7 @@
                             b = 0;
                         }
                         
-                        this.pointColours[pointNumber] = "rgba(" + r + ", " + g + ", " + b + ", 0.3)";
+                        ^
                     }
                     
                     point.alpha = 1;
@@ -276,7 +276,7 @@
                     return Math.sin((angleInterval * 10) * a) * Math.tan(a * a) / Math.tan(a * a);
                 },
                 trailsUpdateMethod: function(point, a){
-                    point.alpha = point.x / 400;
+                    point.alpha = point.y / 1000;
                     point.color = Math.round(Math.random()) ? 'red' : 'green';
                     return point;
                 }

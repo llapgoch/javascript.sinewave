@@ -1,14 +1,14 @@
-jQuery.widget('llapgoch.centipede', {
+jQuery.widget('llapgoch.sinepath', {
     options: {
         stageWidth: 800,
         stageHeight: 700,
         minDiameter: 20,
         maxDiameter: 300,
         minDegrees: 1,
-        maxDegrees: 300,
+        maxDegrees: 180,
         speed: 5,
         arcRenderSpacing: 1,
-        drawControlPoints: true,
+        drawControlPoints: false,
         startRotation: 0,
         startPoint:{
             x: 100,
@@ -24,6 +24,7 @@ jQuery.widget('llapgoch.centipede', {
     currentSin: 0,
     currentDiameter: 100,
     totalDistance: 0,
+    demoPos: 1,
     
     _create: function(){
         var canvas =  $('<canvas />', {
@@ -39,19 +40,30 @@ jQuery.widget('llapgoch.centipede', {
         this.canvas.height = this.options.stageHeight;
 
         this.ctx = this.canvas.getContext('2d');
-        
-        this.currentX = this.options.startPointX;
-        this.currentY = this.options.startPointY;
 
-        // for(var i = 0; i < 4; i++){
- //            this._createArc(true);
- //        }
- 
-        this.getPosition(10000);
-        var arcPoint = this.getPointInArc(this.arcs[0], 10);
-        this._plotPoint(arcPoint, 4, 'purple');
-        
-        console.log(this.arcs);
+        var self = this;
+
+        window.setInterval(function(){
+            self.demoMove();
+        }, 10);
+    },
+
+    demoMove: function(){
+        var arcPoint = this.getPointForPosition(this.demoPos);
+
+        //this._clearStage();
+        var r = Math.round(Math.random() * 255);
+        var g = Math.round(Math.random() * 255);
+        var b = Math.abs(Math.round(Math.random() * 255));
+        var color = "rgba(" + r + ", " + g + ", " + b + ", 1)";
+
+        this._plotPoint(arcPoint, this.demoPos / 300, color);
+        this.demoPos+= 10;
+
+    },
+
+    _clearStage: function(){
+        this.ctx.clearRect(0, 0, this.options.stageWidth, this.options.stageHeight);
     },
     
     _degreesToRadians: function(deg){
@@ -75,7 +87,9 @@ jQuery.widget('llapgoch.centipede', {
     
     _plotPoint: function(point, size, color){
         this.ctx.fillStyle = color;
-        this.ctx.fillRect(point.x - (size / 2), point.y - (size / 2), size, size);
+        this.ctx.beginPath();
+        this.ctx.arc(point.x - (size / 2), point.y - (size / 2), size, 0, 2 * Math.PI, false);
+        //this.ctx.fillRect(point.x - (size / 2), point.y - (size / 2), size, size);
         this.ctx.fill();
     },
     
@@ -165,7 +179,7 @@ jQuery.widget('llapgoch.centipede', {
     
     getPointInArc: function(arc, position){
         if(position > arc.distance){
-            throw 'Out of arc bounds';
+            throw 'Out of arc bounds: ' + position + " / " + arc.distance;
         }  
         
         var circumference = (Math.PI * arc.diameter);
@@ -184,7 +198,7 @@ jQuery.widget('llapgoch.centipede', {
     
     _drawArc: function(arc){
          var steps = arc.distance / this.options.arcRenderSpacing; 
-        // Draws a visual representation of the path using this.options.arcRenderSpacing    
+        // Draws a visual representation of the path using this.options.arcRenderSpacing
         if(this.options.drawControlPoints){
             this._plotPoint(arc.centerPoint, 4, 'blue');
         }
@@ -201,13 +215,13 @@ jQuery.widget('llapgoch.centipede', {
     },
     
     // gets the position on the arcs, creates new if required
-    getPosition: function(pos){
+    getArcForPosition: function(pos){
         var cumulativeDistance = 0,
             currentArc,
             relativeDistance;
         
         while(pos > this.totalDistance){
-            this._createArc(true);
+            this._createArc(false);
         }
         
         // TODO: Adapt this for finding the arc for the requested pos
@@ -222,9 +236,16 @@ jQuery.widget('llapgoch.centipede', {
         }
         
         relativeDistance = pos - cumulativeDistance;
+
+        return {
+            arc: currentArc,
+            relativePosition: relativeDistance
+        };
     },
     
-    _getPositionOnArc: function(pos){
-        
+    getPointForPosition: function(pos){
+        var arcData = this.getArcForPosition(pos);
+
+        return this.getPointInArc(arcData.arc, arcData.relativePosition);
     }
 });
