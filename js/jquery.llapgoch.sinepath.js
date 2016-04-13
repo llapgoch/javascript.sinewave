@@ -51,14 +51,18 @@ jQuery.widget('llapgoch.sinepath', {
     demoMove: function(){
         var arcPoint = this.getPointForPosition(this.demoPos);
 
-        //this._clearStage();
         var r = Math.round(Math.random() * 255);
         var g = Math.round(Math.random() * 255);
         var b = Math.abs(Math.round(Math.random() * 255));
-        var color = "rgba(" + r + ", " + g + ", " + b + ", 1)";
-
-        this._plotPoint(arcPoint, this.demoPos / 300, color);
-        this.demoPos+= 10;
+        var color = 'black';
+        
+        
+        this._clearStage();
+        //this._drawArcs();
+        this._drawArc(this.arcs[this.arcs.length - 1]);
+        this._plotRect(arcPoint, 10, 30, color, arcPoint.rotation);
+        
+        this.demoPos+= 50;
 
     },
 
@@ -89,8 +93,23 @@ jQuery.widget('llapgoch.sinepath', {
         this.ctx.fillStyle = color;
         this.ctx.beginPath();
         this.ctx.arc(point.x - (size / 2), point.y - (size / 2), size, 0, 2 * Math.PI, false);
-        //this.ctx.fillRect(point.x - (size / 2), point.y - (size / 2), size, size);
         this.ctx.fill();
+    },
+    
+    _plotRect: function(point, width, height, color, rotation){
+        if(rotation){
+            this.ctx.translate(point.x, point.y);
+            this.ctx.rotate(this._degreesToRadians(rotation));
+            this.ctx.translate(-point.x, -point.y);
+        }
+        
+        this.ctx.fillStyle = color;        
+        this.ctx.fillRect(point.x - (width / 2), point.y - (height / 2), width, height);
+        this.ctx.fill();
+       
+        if(rotation){
+            this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+        }
     },
     
     _createArc: function(draw){
@@ -214,6 +233,12 @@ jQuery.widget('llapgoch.sinepath', {
        }
     },
     
+    _drawArcs: function(){
+        for(var i = 0; i < this.arcs.length; i++){
+            this._drawArc(this.arcs[i]);
+        }
+    },
+    
     // gets the position on the arcs, creates new if required
     getArcForPosition: function(pos){
         var cumulativeDistance = 0,
@@ -243,9 +268,25 @@ jQuery.widget('llapgoch.sinepath', {
         };
     },
     
+    _getRotationBetweenPoints(point1, point2){
+        var dY = point2.y - point1.y;
+        var dX = point2.x - point1.x;
+        
+        return Math.atan(dY / dX) * 180 / Math.PI;
+    },
+    
     getPointForPosition: function(pos){
+        var pastArcData = this.getArcForPosition(pos - 1);
         var arcData = this.getArcForPosition(pos);
-
-        return this.getPointInArc(arcData.arc, arcData.relativePosition);
+        var point = this.getPointInArc(arcData.arc, arcData.relativePosition);
+        var rotation = this.options.startRotation;
+        
+        if(pastArcData.arc){
+            var lastPoint = this.getPointInArc(pastArcData.arc, pastArcData.relativePosition);
+            rotation = this._getRotationBetweenPoints(lastPoint, point);
+        }
+       
+        point.rotation = rotation; 
+        return point;
     }
 });
