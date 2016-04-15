@@ -2,11 +2,11 @@ jQuery.widget('llapgoch.sinepath', {
     options: {
         stageWidth: 800,
         stageHeight: 700,
-        minDiameter: 20,
-        maxDiameter: 300,
-        minDegrees: 1,
-        maxDegrees: 180,
-        speed: 5,
+        minDiameter: 30,
+        maxDiameter: 500,
+        minDegrees: 10,
+        maxDegrees: 200,
+        speed: 10,
         arcRenderSpacing: 1,
         drawControlPoints: false,
         startRotation: 0,
@@ -49,21 +49,32 @@ jQuery.widget('llapgoch.sinepath', {
     },
 
     demoMove: function(){
-        var arcPoint = this.getPointForPosition(this.demoPos);
-
-        var r = Math.round(Math.random() * 255);
-        var g = Math.round(Math.random() * 255);
-        var b = Math.abs(Math.round(Math.random() * 255));
-        var color = 'black';
-        
-        
+        var arcPoint, r, g, b, color,
+            segments = 200,
+            segmentWidth = 10,
+            segmentHeight = 20;
+            overlap = 5;
+            
         this._clearStage();
-        //this._drawArcs();
-        this._drawArc(this.arcs[this.arcs.length - 1]);
-        this._plotRect(arcPoint, 10, 30, color, arcPoint.rotation);
         
-        this.demoPos+= 50;
+        for(var i = 0; i < segments; i++){
+            arcPoint = this.getPointForPosition(this.demoPos + (i * (segmentWidth - overlap)));
 
+            r = Math.round(Math.random() * 255);
+            g = Math.round(Math.random() * 255);
+            b = Math.abs(Math.round(Math.random() * 255));
+            color = 'black';
+        
+        
+            
+            //this._drawArcs();
+            this._plotRect(arcPoint, segmentWidth, segmentHeight, color, arcPoint.rotation);
+        
+            
+        }
+        
+        //this._drawArc(this.arcs[this.arcs.length - 1]);
+        this.demoPos+= 2;
     },
 
     _clearStage: function(){
@@ -268,6 +279,7 @@ jQuery.widget('llapgoch.sinepath', {
         };
     },
     
+    // Returns rotation in degrees
     _getRotationBetweenPoints(point1, point2){
         var dY = point2.y - point1.y;
         var dX = point2.x - point1.x;
