@@ -79,7 +79,7 @@
     }
 
     function getMaxScrollY() {
-      return document.documentElement.clientHeight - window.innerHeight;
+      return document.documentElement.scrollHeight - window.innerHeight;
     }
 
     function getScreenZoomInverse() {
@@ -88,6 +88,10 @@
 
     function getScreenZoomAmount() {
       return document.documentElement.clientWidth / window.innerWidth;
+    }
+
+    function isZoomedIn() {
+      return this.getScreenZoomAmount() > 1;
     }
 
     jQuery('document').ready(function () {
@@ -100,19 +104,21 @@
         const scrollY = Math.max(0, this.getWindowScrollY());
         const scrollX = Math.max(0, this.getWindowScrollX());
         // The scroll offset when iOS rubber bands
-        const bandOffsetX = Math.max(0, getWindowScrollX() - getMaxScrollX());
-        const bandOffsetY = Math.max(0, getWindowScrollY() - getMaxScrollY());
+        const bandOffsetX = isZoomedIn() ? Math.max(0, scrollX - getMaxScrollX()) : 0;
+        const bandOffsetY = isZoomedIn() ? Math.max(0, scrollY - getMaxScrollY()) : 0;
 
         // Align to screen top
         // target.css('top', Math.abs(offset.top) + 'px');
         // target.css('left', Math.abs(offset.left) + 'px');
 
         let left = ((bounds.left - scrollX) + Math.abs(offset.left)) - bandOffsetX;
+        // TODO: Get Y working with banding
         let top = ((bounds.top - scrollY) + Math.abs(offset.top)) - bandOffsetY;
 
 
         // console.log(document.documentElement.clientWidth * getScreenZoomInverse(), scrollX);
-        console.log(bandOffsetX);
+        console.log(bandOffsetX, bandOffsetY);
+        // console.log(getMaxScrollX(), getMaxScrollY());
 
         target.css('left', left + 'px');
         target.css('top', top + 'px');
