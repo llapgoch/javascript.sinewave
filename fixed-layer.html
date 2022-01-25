@@ -1,0 +1,153 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+
+  <title>Sine</title>
+
+  <style>
+    body {
+      margin: 0;
+    }
+
+    .overlay {
+      position: fixed;
+      width: 100vw;
+      height: 100vh;
+      top: 0;
+      left: 0;
+      border: 10px solid red;
+      box-sizing: border-box;
+    }
+
+    .source-object {
+      width: 30px;
+      height: 30px;
+      position: relative;
+      background: chocolate;
+      left: 600px;
+      top: 100px;
+    }
+
+    .target-object {
+      width: 30px;
+      height: 30px;
+      position: absolute;
+      background: purple;
+    }
+  </style>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+
+  <script>
+    const $ = jQuery;
+    // On update, track the source-object with an object in the fixed layer
+
+    function getFixedOffset() {
+      const rect = $('.overlay').get(0).getBoundingClientRect();
+      return { 'left': rect.left, 'top': rect.top }
+
+
+      // let fixedElem = document.createElement('div');
+      // fixedElem.style.cssText = 'position:fixed; top: 0; left: 0';
+      // document.body.appendChild(fixedElem);
+      // const rect = fixedElem.getBoundingClientRect();
+      // document.body.removeChild(fixedElem);
+      // return { 'left': rect.left, 'top': rect.top }
+    }
+
+    function getTarget() {
+      return $('.target-object');
+    }
+
+    function getSource() {
+      return $('.source-object');
+    }
+
+    function getWindowScrollY() {
+      return window.scrollY;
+    }
+
+    function getWindowScrollX() {
+      return window.scrollX;
+    }
+
+    function getMaxScrollX() {
+      return document.documentElement.clientWidth - window.innerWidth;
+    }
+
+    function getMaxScrollY() {
+      return document.documentElement.clientHeight - window.innerHeight;
+    }
+
+    function getScreenZoomInverse() {
+      return window.innerWidth / document.documentElement.clientWidth;
+    }
+
+    function getScreenZoomAmount() {
+      return document.documentElement.clientWidth / window.innerWidth;
+    }
+
+    jQuery('document').ready(function () {
+
+      jQuery(window).on('scroll', function () {
+        const offset = getFixedOffset();
+        const target = getTarget();
+        const source = getSource();
+        const bounds = source.offset();
+        const scrollY = Math.max(0, this.getWindowScrollY());
+        const scrollX = Math.max(0, this.getWindowScrollX());
+        // The scroll offset when iOS rubber bands
+        const bandOffsetX = Math.max(0, getWindowScrollX() - getMaxScrollX());
+        const bandOffsetY = Math.max(0, getWindowScrollY() - getMaxScrollY());
+
+        // Align to screen top
+        // target.css('top', Math.abs(offset.top) + 'px');
+        // target.css('left', Math.abs(offset.left) + 'px');
+
+        let left = ((bounds.left - scrollX) + Math.abs(offset.left)) - bandOffsetX;
+        let top = ((bounds.top - scrollY) + Math.abs(offset.top)) - bandOffsetY;
+
+
+        // console.log(document.documentElement.clientWidth * getScreenZoomInverse(), scrollX);
+        console.log(bandOffsetX);
+
+        target.css('left', left + 'px');
+        target.css('top', top + 'px');
+      });
+    });
+  </script>
+</head>
+
+<body>
+  <div class="overlay">
+    <div class="target-object"></div>
+  </div>
+
+  <h2>Item</h2>
+  <p>It's some text</p>
+  <h2>Item</h2>
+  <p>It's some text</p>
+  <h2>Item</h2>
+  <p>It's some text</p>
+  <h2>Item</h2>
+  <p>It's some text</p>
+  <h2>Item</h2>
+  <p>It's some text</p>
+  <div class="source-object"></div>
+  <h2>Item</h2>
+  <p>It's some text</p>
+  <h2>Item</h2>
+  <p>It's some text</p>
+  <h2>Item</h2>
+  <p>It's some text</p>
+  <h2>Item</h2>
+  <p>It's some text</p>
+  <h2>Item</h2>
+  <p>It's some text</p>
+
+</body>
+
+</html>

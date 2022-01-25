@@ -1,0 +1,262 @@
+<html>
+
+<head>
+    <title>~Splurgingly Globulous~</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r122/three.min.js"></script>
+    <style>
+        body {
+            background: grey;
+        }
+
+        #animate,
+        #target {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            z-index: 100;
+            background-color: #f31115;
+            border: white 1px solid;
+            border-radius: 50%;
+            top: -100px;
+            left: -100px;
+        }
+
+        #target {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: cadetblue;
+        }
+    </style>
+</head>
+
+<div id="animate"></div>
+<div id="target"></div>
+
+<script>
+    const animEl = document.getElementById('animate');
+    const targetEl = document.getElementById('target');
+    let animationFrame = null;
+
+    var startPosition = {
+        x: 0,
+        y: 0
+    };
+
+    var DEG_TO_RAD = 0.0174533;
+
+    // Object behaviour
+    var minSpeed = 0;
+    var maxSpeed = 15;
+    // velocity to add when accelerating or decelerating
+    var acceleration = 1;
+    var deceleration = 0.95;
+    // Degrees the object turns towards the target
+    var turnAngle = 10;
+    // The point at which to reduce speed
+    var decelerationThreshold = 0.6;
+
+    // Current velocity and angle
+    var velocityAngle = 0;
+    var velocitySpeed = 0;
+    var completeTargetDistance = 0;
+    var previousDistanceToTarget = 0;
+
+    var currentPosition = {
+        x: 0,
+        y: 0
+    }
+
+    var targetPosition = null;
+
+    function normaliseAngle(deg) {
+        deg = deg % 360;
+
+        if (deg < 0) {
+            deg += 360;
+        }
+
+        return deg;
+    }
+
+    function angleDifference(angle1, angle2) {
+        var diff = Math.max(angle1, angle2) - Math.min(angle1, angle2);
+        if (diff > 180) {
+            diff = 360 - diff;
+        }
+
+        return diff;
+    }
+
+    function updatePosition() {
+
+        if (!this.targetPosition) {
+            return;
+        }
+
+        // If the speed is zero, change instantly to the target position
+        let toTurn = null;
+        const angleToTarget = this.angleBetweenPoints(this.currentPosition, this.targetPosition);
+        const distanceToTarget = this.distanceBetweenPoints(this.currentPosition, this.targetPosition);
+
+        if (this.velocitySpeed == 0) {
+            this.velocityAngle = angleToTarget;
+        }
+
+        const angleDiff = this.angleDifference(angleToTarget, this.velocityAngle);
+        let atAngle = false;
+
+
+        // If the angle is not the target angle, then change it. 
+        if (angleDiff > this.turnAngle) {
+            toTurn = Math.min(angleDiff, this.turnAngle);
+            // If the angleDiff is over 180 degrees, turn negative, otherwise positive
+            this.velocityAngle = this.normaliseAngle(this.velocityAngle + (angleDiff > 180 ? -toTurn : toTurn));
+            this.velocitySpeed *= this.deceleration;
+        } else {
+            this.velocityAngle = angleToTarget;
+            atAngle = true;
+        }
+
+        const positionShift = this.velocityToCartesian(this.velocityAngle, this.velocitySpeed);
+        // If the distance with the modified angle is modified angle is further away then before, 
+        // we're still travelling in the wrong direction - slow down.
+        const newPositionAfterShift = {
+            x: this.currentPosition.x + positionShift.x,
+            y: this.currentPosition.y + positionShift.y
+        };
+        const newDistanceToTarget = this.distanceBetweenPoints(newPositionAfterShift, this.targetPosition);
+        // fraction moved 
+        const fr = (this.completeTargetDistance - newDistanceToTarget) / this.completeTargetDistance;
+
+        // If we're at the right angle, and over the deceleration threshold divide the remaining distance to slow 
+        // down but never reach the target.
+        if (atAngle && fr >= this.decelerationThreshold) {
+            // This shouldn't speed up - only apply deceleration
+            this.velocitySpeed = Math.min(this.velocitySpeed, newDistanceToTarget - (newDistanceToTarget * this
+                .deceleration));
+        } else {
+            if (newDistanceToTarget > this.previousDistanceToTarget) {
+                // Slow down, we're still moving away
+                this.velocitySpeed = Math.max(this.minSpeed, this.velocitySpeed * this.deceleration);
+            } else {
+                this.velocitySpeed = Math.min(this.maxSpeed, Math.max(this.minSpeed, this.velocitySpeed + this
+                    .acceleration))
+            }
+        }
+
+        this.currentPosition = newPositionAfterShift;
+
+        animEl.style.left = currentPosition.x;
+        animEl.style.top = currentPosition.y;
+        this.previousDistanceToTarget = newDistanceToTarget;
+
+    }
+
+    function stopLoop() {
+        if (animationFrame) {
+            cancelAnimationFrame(animationFrame);
+        }
+    }
+
+    function beginLoop() {
+        animationFrame = requestAnimationFrame(beginLoop);
+        this.updatePosition();
+    }
+
+    function setTargetPosition(target) {
+        targetEl.style.left = target.x;
+        targetEl.style.top = target.y;
+
+        targetPosition = target;
+        completeTargetDistance = distanceBetweenPoints(currentPosition, targetPosition);
+    }
+
+    function velocityToCartesian(degrees, distance) {
+        return {
+            x: distance * Math.cos(degreesToRadians(degrees)),
+            y: distance * Math.sin(degreesToRadians(degrees))
+        }
+    }
+
+    function radiansToDegrees(radians) {
+        var pi = Math.PI;
+        return radians * (180 / pi);
+    }
+
+    function degreesToRadians(degrees) {
+        return degrees * DEG_TO_RAD;
+    }
+
+    function angleBetweenPoints(a, b) {
+        var deltaY = b.y - a.y;
+        var deltaX = b.x - a.x;
+        return radiansToDegrees(Math.atan2(deltaY, deltaX));
+    }
+
+    function getPointOnLine(p1, p2, fraction) {
+        var d = Math.sqrt((p2.x - p1.x) ^ 2 + (p2.y - p1.y) ^ 2);
+        var r = fraction;
+
+        var x3 = r * p2.x + (1 - r) * p1.x;
+        var y3 = r * p2.y + (1 - r) * p1.y;
+
+        return {
+            x: x3,
+            y: y3
+        };
+    }
+
+    function rotatePoint(pPoint, pOrigin, rot) {
+        var rp = {};
+        var radians = (rot / 180) * Math.PI;
+
+        rp.x = pOrigin.x + (Math.cos(radians) * (pPoint.x - pOrigin.x) - Math.sin(radians) * (pPoint.y - pOrigin
+            .y));
+        rp.y = pOrigin.y + (Math.sin(radians) * (pPoint.x - pOrigin.x) + Math.cos(radians) * (pPoint.y - pOrigin
+            .y));
+
+        return rp;
+    }
+
+    function distanceBetweenPoints(p1, p2) {
+        // var a = p1.x - p2.x;
+        // var b = p1.y - p2.y;
+        // return Math.sqrt(a * a + b * b);
+        p1 = validatePoint(p1);
+        p2 = validatePoint(p2);
+
+        const a = new THREE.Vector3(p1.x, p1.y, p1.z);
+        const b = new THREE.Vector3(p2.x, p2.y, p2.z);
+
+        return Math.abs(a.distanceTo(b));
+
+    }
+
+    function validatePoint(point) {
+        if (point.z === null) {
+            point.z = 1;
+        }
+
+        return point;
+    }
+
+
+
+    beginLoop();
+
+    function setRandomPostion() {
+        setTargetPosition({
+            x: Math.random() * window.innerWidth,
+            y: Math.random() * window.innerHeight
+        });
+    }
+
+    window.setInterval(function () {
+        setRandomPostion();
+    }, 1000);
+
+    setRandomPostion();
+</script>
+
+</html>

@@ -1,0 +1,122 @@
+<html>
+
+<head>
+    <title>qwdqwdq</title>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.js"
+        integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script>
+    <style>
+        #animate {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background-color: blue;
+            top: 0;
+            left: 0;
+        }
+    </style>
+</head>
+
+<div id="animate"></div>
+
+<div class="cursor--container">
+    <div class="cursor"></div>
+    <div class="cursor-follower" id="animate"></div>
+</div>
+
+<script>
+    Cursor = function () {};
+    Cursor.prototype = {
+        init: function () {
+            this.follower = $(".cursor-follower")
+            this.isfollowing = false;
+            this.cursor = $(".cursor")
+            this.tar = $(".cur")
+            this.watch()
+            this.events()
+        },
+
+        update: function () {
+            this.tar.off("mouseenter")
+            this.tar.off("mouseleave")
+            this.events()
+        },
+
+        watch: function () {
+            let self = this
+
+            $(document).bind("mousemove", function (e) {
+                self.mouseX = e.pageX
+                self.mouseY = e.pageY + document.body.getBoundingClientRect().top
+                self.moved = true
+
+                console.log(self.isfollowing);
+                // debugger;
+
+                if (self.moved == true && self.mouseX != 0 && self.mouseX != undefined && self.isfollowing == false) {
+                    $(".cursor-follower").removeClass("hide")
+                    $(".cursor").removeClass("hide")
+                    self.follow();
+                    console.log("F");
+                    self.isfollowing = true
+                }
+            })
+        },
+
+        events: function () {
+            $(".cursor-follower").removeClass("active")
+            $(".cursor").removeClass("active")
+
+            let self = this
+            this.tar = $(".cur, strong")
+            this.tar.bind("mouseenter", function () {
+                $(".cursor-follower").addClass("active")
+                $(".cursor").addClass("active")
+                $(".hover").addClass("hovered")
+                $(this).removeClass("hovered")
+            })
+
+            this.tar.bind("mouseleave", function () {
+                $(".cursor-follower").removeClass("active")
+                $(".cursor").removeClass("active")
+                $(".hover").removeClass("hovered")
+            })
+        },
+
+        follow: function () {
+            let e = 0
+            let s = 0
+
+            let self = this
+            
+            setInterval(function () {
+                if (e != NaN && s != NaN) {
+                    e += (self.mouseX - e) / 99
+                    s += (self.mouseY - s) / 99
+
+                    console.log(e, s);
+
+                    $(".cursor-follower").css({
+                        left: e - 12,
+                        top: s - 12
+                    })
+                }
+
+                $(".cursor").css({
+                    left: self.mouseX,
+                    top: self.mouseY
+                })
+            }, 30)
+        },
+
+        reset: function () {
+            $('.cur').unbind('mouseenter')
+            $('.cur').unbind('mouseleave')
+            this.events()
+        }
+
+    }
+
+    const c = new Cursor();
+    c.init();
+</script>
